@@ -1,12 +1,56 @@
-# React + Vite
+## 主要功能
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- 用户注册、登录、登出
+- 项目、投标、企业等信息浏览
+- 会员信息、个人中心
+- 登录鉴权与页面访问保护
+- 全局错误兜底，防止页面空白
 
-Currently, two official plugins are available:
+## 登录保护与错误兜底
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 受保护页面通过 `PrivateRoute` 组件实现，未登录用户访问时自动跳转到 `/login`。
+- 全局用 `ErrorBoundary` 组件包裹，任何页面报错不会导致全局空白，会显示友好错误提示。
+- 各页面接口请求均有 loading、error、无数据等兜底处理，提升用户体验。
 
-## Expanding the ESLint configuration
+## 启动与开发
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. 安装依赖
+
+   ```bash
+   npm install
+   ```
+
+2. 本地开发
+
+   ```bash
+   npm run dev
+   ```
+
+   默认访问地址为 [http://localhost:5173](http://localhost:5173)
+
+3. 生产构建
+
+   ```bash
+   npm run build
+   ```
+
+4. 预览构建产物
+
+   ```bash
+   npm run preview
+   ```
+
+## 代码规范
+
+- 使用 ESLint 进行代码检查，命令：`npm run lint`
+- 推荐使用函数式组件与 hooks
+- UI 统一采用 Material UI 组件库
+
+## 其他说明
+
+- 本项目需配合后端 API 使用，接口地址见 `.env` 或源码 axios 请求部分
+- 如需扩展页面或组件，建议参考现有风格与结构
+
+---
+
+如有问题请联系项目维护者。
