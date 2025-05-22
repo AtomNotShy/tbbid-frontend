@@ -13,6 +13,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import axios from 'axios';
 import Pagination from '@mui/material/Pagination';
 import { Link, useLocation } from 'react-router-dom';
+import dayjs from "dayjs";
 
 export default function CompanySearch() {
   const location = useLocation();
@@ -31,6 +32,10 @@ export default function CompanySearch() {
   const [bids, setBids] = useState([]);
   const BID_PAGE_SIZE = 20;
   const [hasSearched, setHasSearched] = useState(false);
+  const [winPage, setWinPage] = useState(1);
+  const [winTotal, setWinTotal] = useState(0);
+  const [wins, setWins] = useState([]);
+  const WIN_PAGE_SIZE = 20;
 
   // 执行搜索
   const handleSearch = useCallback(() => {
@@ -73,6 +78,20 @@ export default function CompanySearch() {
         });
     }
   }, [selected, tab, bidPage]);
+
+  useEffect(() => {
+    if (selected && tab === 'winning') {
+      axios.get(`/api/company-wins/?corp_code=${encodeURIComponent(selected.corp_code)}&page=${winPage}`)
+        .then(res => {
+          setWins(res.data.results || []);
+          setWinTotal(res.data.count || 0);
+        })
+        .catch(() => {
+          setWins([]);
+          setWinTotal(0);
+        });
+    }
+  }, [selected, tab, winPage]);
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
@@ -142,11 +161,12 @@ export default function CompanySearch() {
             <Button variant="text" size="small" onClick={() => setSelected(null)} sx={{ mb: 2 }}>
               ← 返回搜索结果
             </Button>
-            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); }} sx={{ mb: 2 }}>
+            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); setBidPage(1); setWinPage(1); }} sx={{ mb: 2 }}>
               <Tab label="基本信息" value="basic" />
               <Tab label="资质信息" value="qualification" />
               <Tab label="员工信息" value="employee" />
               <Tab label="招投标记录" value="bidding" />
+              <Tab label="中标记录" value="winning" />
             </Tabs>
             {tab === 'basic' && (
               <Grid container spacing={4}>
@@ -173,7 +193,7 @@ export default function CompanySearch() {
                   <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
                     <Typography color="text.secondary" fontSize={14} sx={{ mr: 1 }}>有效期</Typography>
                     <CalendarMonthIcon sx={{ fontSize: 18, color: 'text.secondary', mr: 1 }} />
-                    <Typography>{selected.valid_date || '—'}</Typography>
+                    <Typography>{selected.valid_date ? dayjs(selected.valid_date).format('YYYY-MM-DD HH:mm') : '—'}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -249,7 +269,7 @@ export default function CompanySearch() {
                         >
                           <ListItemText
                             primary={<span>{bid.section_name}（{bid.project_id}）</span>}
-                            secondary={<span>投标金额：{bid.bid_amount ? `¥${bid.bid_amount}` : '—'}，开标时间：{bid.bid_open_time ? bid.bid_open_time : '—'}</span>}
+                            secondary={<span>投标金额：{bid.bid_amount ? `¥${bid.bid_amount}` : '—'}，开标时间：{bid.bid_open_time ? dayjs(bid.bid_open_time).format('YYYY-MM-DD HH:mm') : '—'}</span>}
                           />
                         </ListItem>
                       ))}
@@ -263,6 +283,40 @@ export default function CompanySearch() {
                   </>
                 ) : (
                   <Typography color="text.secondary">暂无招投标记录</Typography>
+                )}
+              </Box>
+            )}
+            {tab === 'winning' && (
+              <Box sx={{ mt: 2 }}>
+                <Typography fontWeight={600} sx={{ mb: 2 }}>中标记录</Typography>
+                {wins.length > 0 ? (
+                  <>
+                    <List>
+                      {wins.map(win => (
+                        <ListItem
+                          key={win.id}
+                          divider
+                          button
+                          component={Link}
+                          to={`/project/${win.project_id}`}
+                          state={{ project_id: win.project_id }}
+                        >
+                          <ListItemText
+                            primary={<span>{win.section_name}（{win.project_id}）</span>}
+                            secondary={<span>中标金额：{win.win_amt ? `¥${win.win_amt}` : '—'}，中标时间：{win.open_time ? dayjs(win.open_time).format('YYYY-MM-DD HH:mm') : '—'}</span>}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                    <Pagination
+                      count={Math.ceil(winTotal / WIN_PAGE_SIZE)}
+                      page={winPage}
+                      onChange={(_, v) => setWinPage(v)}
+                      sx={{ mt: 2 }}
+                    />
+                  </>
+                ) : (
+                  <Typography color="text.secondary">暂无中标记录</Typography>
                 )}
               </Box>
             )}
