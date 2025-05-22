@@ -396,7 +396,7 @@ export default function CompanySearch() {
                           state={{ achievement: ach }}
                         >
                           <ListItemText
-                            primary={<span>{ach.section_name || ach.project_name}（{ach.project_id || '无项目号'}）</span>}
+                            primary={<span>{ach.section_name || ach.project_name}</span>}
                             secondary={<span>中标金额：{ach.win_amt ? `¥${ach.win_amt}万` : '—'}，创建时间：{ach.create_time ? dayjs(ach.create_time).format('YYYY-MM-DD HH:mm') : '—'}</span>}
                           />
                         </SmartListItem>
