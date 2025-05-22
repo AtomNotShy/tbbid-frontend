@@ -14,6 +14,7 @@ import axios from 'axios';
 import Pagination from '@mui/material/Pagination';
 import { Link, useLocation } from 'react-router-dom';
 import dayjs from "dayjs";
+import SmartListItem from '../components/SmartListItem';
 
 export default function CompanySearch() {
   const location = useLocation();
@@ -36,6 +37,44 @@ export default function CompanySearch() {
   const [winTotal, setWinTotal] = useState(0);
   const [wins, setWins] = useState([]);
   const WIN_PAGE_SIZE = 20;
+  const [achPage, setAchPage] = useState(1);
+  const [achTotal, setAchTotal] = useState(0);
+  const [achievements, setAchievements] = useState([]);
+  const ACH_PAGE_SIZE = 20;
+
+  // 检查是否从详情页返回，以及需要恢复的状态
+  useEffect(() => {
+    if (location.state?.returnToCompany && location.state?.companyCode) {
+      // 查找并恢复之前查看的公司
+      const companyCode = location.state.companyCode;
+      const activeTab = location.state.activeTab || 'basic';
+      
+      // 如果有公司数据，直接查找并设置
+      if (results.length > 0) {
+        const company = results.find(c => c.corp_code === companyCode);
+        if (company) {
+          setSelected(company);
+          setTab(activeTab);
+        }
+      } 
+      // 如果没有公司数据，可能需要重新获取
+      else {
+        axios.get(`/api/company-search?query=${encodeURIComponent(companyCode)}`)
+          .then(res => {
+            const companies = Array.isArray(res.data) ? res.data : [];
+            if (companies.length > 0) {
+              setResults(companies);
+              const company = companies.find(c => c.corp_code === companyCode);
+              if (company) {
+                setSelected(company);
+                setTab(activeTab);
+              }
+            }
+          })
+          .catch(err => console.error("恢复公司状态失败:", err));
+      }
+    }
+  }, [location.state]);
 
   // 执行搜索
   const handleSearch = useCallback(() => {
@@ -92,6 +131,20 @@ export default function CompanySearch() {
         });
     }
   }, [selected, tab, winPage]);
+
+  useEffect(() => {
+    if (selected && tab === 'achievements') {
+      axios.get(`/api/company-achievements/?corp_code=${encodeURIComponent(selected.corp_code)}&page=${achPage}`)
+        .then(res => {
+          setAchievements(res.data.results || []);
+          setAchTotal(res.data.count || 0);
+        })
+        .catch(() => {
+          setAchievements([]);
+          setAchTotal(0);
+        });
+    }
+  }, [selected, tab, achPage]);
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
@@ -161,12 +214,13 @@ export default function CompanySearch() {
             <Button variant="text" size="small" onClick={() => setSelected(null)} sx={{ mb: 2 }}>
               ← 返回搜索结果
             </Button>
-            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); setBidPage(1); setWinPage(1); }} sx={{ mb: 2 }}>
+            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); setBidPage(1); setWinPage(1); setAchPage(1); }} sx={{ mb: 2 }}>
               <Tab label="基本信息" value="basic" />
               <Tab label="资质信息" value="qualification" />
               <Tab label="员工信息" value="employee" />
               <Tab label="招投标记录" value="bidding" />
               <Tab label="中标记录" value="winning" />
+              <Tab label="全国业绩" value="achievements" />
             </Tabs>
             {tab === 'basic' && (
               <Grid container spacing={4}>
@@ -317,6 +371,46 @@ export default function CompanySearch() {
                   </>
                 ) : (
                   <Typography color="text.secondary">暂无中标记录</Typography>
+                )}
+              </Box>
+            )}
+            {tab === 'achievements' && (
+              <Box sx={{ mt: 2 }}>
+                <Typography fontWeight={600} sx={{ mb: 2 }}>全国业绩</Typography>
+                {achievements.length > 0 ? (
+                  <>
+                    <List>
+                      {achievements.map(ach => (
+                        <SmartListItem
+                          key={ach.id}
+                          divider
+                          button
+                          to={`/achievement/${ach.id}`}
+                          sourceKey="company-achievements"
+                          returnTo="/company-search"
+                          returnParams={{ 
+                            returnToCompany: true,
+                            companyCode: selected.corp_code,
+                            activeTab: 'achievements'
+                          }}
+                          state={{ achievement: ach }}
+                        >
+                          <ListItemText
+                            primary={<span>{ach.section_name || ach.project_name}（{ach.project_id || '无项目号'}）</span>}
+                            secondary={<span>中标金额：{ach.win_amt ? `¥${ach.win_amt}万` : '—'}，创建时间：{ach.create_time ? dayjs(ach.create_time).format('YYYY-MM-DD HH:mm') : '—'}</span>}
+                          />
+                        </SmartListItem>
+                      ))}
+                    </List>
+                    <Pagination
+                      count={Math.ceil(achTotal / ACH_PAGE_SIZE)}
+                      page={achPage}
+                      onChange={(_, v) => setAchPage(v)}
+                      sx={{ mt: 2 }}
+                    />
+                  </>
+                ) : (
+                  <Typography color="text.secondary">暂无全国业绩</Typography>
                 )}
               </Box>
             )}

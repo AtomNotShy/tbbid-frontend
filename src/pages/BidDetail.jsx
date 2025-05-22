@@ -3,6 +3,7 @@ import { Box, Typography, Paper, Divider, CircularProgress, Table, TableBody, Ta
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import BackButton from '../components/BackButton';
 
 export default function BidDetail() {
   const { id } = useParams();
@@ -32,6 +33,11 @@ export default function BidDetail() {
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
+      <BackButton 
+        sourceKey="bid-detail"
+        fallbackPath="/bids-list"
+        sx={{ mb: 2 }}
+      />
       <Paper sx={{ p: 4 }}>
         <Typography variant="h4" fontWeight={700} gutterBottom>{sectionName}</Typography>
         {lotCtlAmt !== undefined && (
