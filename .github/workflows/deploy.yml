@@ -23,13 +23,14 @@ jobs:
 
       - name: Build React App
         run: npm run build
+      - name: Debug build directory
+        run: ls -lah build/
 
       - name: Deploy to Aliyun via SSH
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.ALIYUN_HOST }}
           username: ${{ secrets.ALIYUN_USER }}
-          password: ${{ secrets.ALIYUN_PW }}
           key: ${{ secrets.ALIYUN_SSH_KEY }}
           source: "build/"
           target: "/home/tbbid/frontend"
