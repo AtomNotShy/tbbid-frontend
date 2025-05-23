@@ -25,7 +25,7 @@ jobs:
         run: npm run build
         
       - name: Debug build directory
-        run: ls -lah build/
+        run: ls -lah dist/
 
       - name: Deploy to Aliyun via SSH
         uses: appleboy/scp-action@v0.1.4
@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.ALIYUN_HOST }}
           username: ${{ secrets.ALIYUN_USER }}
           key: ${{ secrets.ALIYUN_SSH_KEY }}
-          source: "build/"
+          source: "dist/"
           target: "/home/tbbid/frontend"
           strip_components: 1
 
