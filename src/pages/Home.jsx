@@ -1,32 +1,55 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 import ProjectList from '../components/ProjectList.jsx';
 import BidList from '../components/BidList';
 import BidResultList from '../components/BidResultList';
 import UpdateCard from '../components/UpdateCard';
 import UnifiedSearch from '../components/UnifiedSearch';
-import axios from 'axios';
+import { useTodayUpdateCount } from '../hooks/useApiData';
 
 export default function Home() {
-  const [todayCount, setTodayCount] = useState({ 
-    project_count: 0, 
-    bid_count: 0, 
-    bid_result_count: 0 
-  });
+  // 使用 React Query hook 获取今日更新数量
+  const { 
+    data: todayCount, 
+    isLoading, 
+    isError, 
+    error,
+    refetch 
+  } = useTodayUpdateCount();
 
-  useEffect(() => {
-    axios.get('/api/today_update_count/')
-      .then(res => {
-        setTodayCount(res.data);
-      })
-      .catch(() => {
-        setTodayCount({ 
-          project_count: 0, 
-          bid_count: 0, 
-          bid_result_count: 0 
-        });
-      });
-  }, []);
+  // 加载中状态
+  if (isLoading) {
+    return (
+      <Box sx={{ 
+        maxWidth: '100%', 
+        mx: 'auto', 
+        mt: { xs: 2, md: 6 }, 
+        px: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '200px'
+      }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // 错误状态
+  if (isError) {
+    return (
+      <Box sx={{ maxWidth: '100%', mx: 'auto', mt: { xs: 2, md: 6 }, px: 2 }}>
+        <Alert 
+          severity="error" 
+          action={
+            <button onClick={() => refetch()}>重试</button>
+          }
+        >
+          加载失败: {error?.message || '未知错误'}
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: '100%', mx: 'auto', mt: { xs: 2, md: 6 }, px: 2 }}>
