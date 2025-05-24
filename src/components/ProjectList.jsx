@@ -76,7 +76,7 @@ export default function ProjectList({ limit = 5, showAll = false }) {
                 <Box component="span" sx={{ display: 'flex', gap: 2, mt: 0.5, color: '#666', fontSize: 15 }}> 
                   <span>区域：{project.district_show}</span>
                   <span>金额：{project.classify_show}</span>
-                  <span>发布时间：{dayjs(project.open_time).format('YYYY-MM-DD HH:mm')}</span>
+                  <span>发布时间：{dayjs(project.time_show).format('YYYY-MM-DD HH:mm')}</span>
                 </Box>
               }
             />
