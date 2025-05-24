@@ -29,7 +29,7 @@ export default function BidResultList({ limit = 5, showAll = false }) {
 
   useEffect(() => {
     loadResults(page);
-  }, [page]);
+  }, [page, limit]);
 
   const loadResults = (currentPage) => {
     setLoading(true);
@@ -65,13 +65,44 @@ export default function BidResultList({ limit = 5, showAll = false }) {
     navigate('/bid-results-list');
   };
 
-  if (loading && results.length === 0) return <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>;
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (!results.length) return <Typography color="text.secondary">暂无开标结果</Typography>;
+  if (loading && results.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Typography color="error" sx={{ textAlign: 'center', py: 2 }}>
+        {error}
+      </Typography>
+    );
+  }
+  
+  if (!results.length) {
+    return (
+      <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+        暂无开标结果
+      </Typography>
+    );
+  }
 
   return (
-    <>
-      <List>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%',
+      minHeight: 0 
+    }}>
+      <List sx={{ 
+        flex: 1, 
+        py: 0,
+        '& .MuiListItem-root': {
+          px: 0
+        }
+      }}>
         {results.map((result) => {
           // 找到同一project_id和section_id的所有结果
           const allRanks = results.filter(r => r.project_id === result.project_id && r.section_id === result.section_id);
@@ -82,51 +113,92 @@ export default function BidResultList({ limit = 5, showAll = false }) {
               to={`/bid-result/${result.id}`}
               key={result.id || result.section_id + '-' + result.bidder_name}
               state={{ allRanks, sectionName: result.section_name }}
-              sx={{ borderRadius: 2, mb: 1, alignItems: 'flex-start', '&:hover': { bgcolor: '#f5f5f7' } }}
+              sx={{ 
+                borderRadius: 1, 
+                mb: 0.5, 
+                mx: 0,
+                py: 1.5,
+                alignItems: 'flex-start', 
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
+                '&:last-child': { mb: 0 }
+              }}
             >
               <ListItemText
-                primary={<Typography fontSize={17} fontWeight={500} title={result.section_name}>{truncate(result.section_name)}</Typography>}
+                primary={
+                  <Typography 
+                    fontSize={16}
+                    fontWeight={500} 
+                    title={result.section_name}
+                    sx={{ 
+                      lineHeight: 1.3,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {result.section_name}
+                  </Typography>
+                }
                 secondary={
-                  <Box component="span" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5, color: '#666', fontSize: 15 }}>
+                  <Box component="span" sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 0.25, 
+                    mt: 0.5, 
+                    color: 'text.secondary', 
+                    fontSize: 12 
+                  }}>
                     <span>中标单位：{result.bidder_name}</span>
                     <span>中标金额：{result.win_amt ? `¥${result.win_amt}` : '—'}</span>
-                    <span>公示时间：{result.open_time ? dayjs(result.open_time).format('YYYY-MM-DD HH:mm') : '-'}</span>
+                    <span>公示：{result.open_time ? dayjs(result.open_time).format('MM-DD HH:mm') : '-'}</span>
                   </Box>
                 }
+                sx={{ m: 0 }}
               />
-              <ListItemIcon sx={{ minWidth: 32, mt: 0.5 }}>
-                <ArrowForwardIosIcon fontSize="small" sx={{ color: '#888' }} />
+              <ListItemIcon sx={{ minWidth: 24, mt: 0.5 }}>
+                <ArrowForwardIosIcon fontSize="small" sx={{ color: '#999', fontSize: 12 }} />
               </ListItemIcon>
             </ListItem>
           );
         })}
       </List>
+      
+      {/* 底部按钮/分页区域 */}
       {showAll && totalPages > 1 ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
           <Pagination 
             count={totalPages} 
             page={page} 
             onChange={handlePageChange} 
-            color="primary" 
+            color="primary"
+            size="small"
           />
         </Box>
       ) : !showAll && totalCount > limit ? (
-        <Box sx={{ textAlign: 'center', mt: 1 }}>
+        <Box sx={{ textAlign: 'center', pt: 1 }}>
           <Button 
             onClick={handleViewMore}
             variant="text" 
             color="primary"
-            sx={{ fontWeight: 500 }}
+            size="small"
+            sx={{ 
+              fontWeight: 500,
+              fontSize: '0.75rem',
+              py: 0.5,
+              minHeight: 'auto'
+            }}
           >
             查看更多
           </Button>
         </Box>
       ) : null}
+      
       {loading && results.length > 0 && (
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <CircularProgress size={24} />
+        <Box sx={{ textAlign: 'center', pt: 1 }}>
+          <CircularProgress size={16} />
         </Box>
       )}
-    </>
+    </Box>
   );
 } 

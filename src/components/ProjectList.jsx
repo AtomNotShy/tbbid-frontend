@@ -18,7 +18,7 @@ export default function ProjectList({ limit = 5, showAll = false }) {
 
   useEffect(() => {
     loadProjects(page);
-  }, [page]);
+  }, [page, limit]);
 
   const loadProjects = (currentPage) => {
     setLoading(true);
@@ -54,13 +54,44 @@ export default function ProjectList({ limit = 5, showAll = false }) {
     navigate('/projects-list');
   };
 
-  if (loading && projects.length === 0) return <Box sx={{ textAlign: 'center', mt: 4 }}><CircularProgress /></Box>;
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (!projects.length) return <Typography color="text.secondary">暂无项目</Typography>;
+  if (loading && projects.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Typography color="error" sx={{ textAlign: 'center', py: 2 }}>
+        {error}
+      </Typography>
+    );
+  }
+  
+  if (!projects.length) {
+    return (
+      <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+        暂无项目
+      </Typography>
+    );
+  }
 
   return (
-    <>
-      <List>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%',
+      minHeight: 0 
+    }}>
+      <List sx={{ 
+        flex: 1, 
+        py: 0,
+        '& .MuiListItem-root': {
+          px: 0
+        }
+      }}>
         {projects.map(project => (
           <ListItem
             button
@@ -68,41 +99,79 @@ export default function ProjectList({ limit = 5, showAll = false }) {
             to={`/project/${project.project_id}`}
             state={{ project }}
             key={project.project_id}
-            sx={{ borderRadius: 2, mb: 1, alignItems: 'flex-start', '&:hover': { bgcolor: '#f5f5f7' } }}
+            sx={{ 
+              borderRadius: 1, 
+              mb: 0.5, 
+              mx: 0,
+              py: 1.5,
+              alignItems: 'flex-start', 
+              '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
+              '&:last-child': { mb: 0 }
+            }}
           >
             <ListItemText
-              primary={<Typography fontSize={17} fontWeight={500} title={project.title}>{truncate(project.title)}</Typography>}
+              primary={
+                <Typography 
+                  fontSize={16}
+                  fontWeight={500} 
+                  title={project.title}
+                  sx={{ 
+                    lineHeight: 1.3,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {project.title}
+                </Typography>
+              }
               secondary={
-                <Box component="span" sx={{ display: 'flex', gap: 2, mt: 0.5, color: '#666', fontSize: 15 }}> 
-                  <span>区域：{project.district_show}</span>
-                  <span>金额：{project.classify_show}</span>
-                  <span>发布时间：{dayjs(project.time_show).format('YYYY-MM-DD HH:mm')}</span>
+                <Box component="span" sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: 0.25, 
+                  mt: 0.5, 
+                  color: 'text.secondary', 
+                  fontSize: 12 
+                }}> 
+                  <span>区域：{project.district_show || '—'}</span>
+                  <span>金额：{project.classify_show || '—'}</span>
+                  <span>发布：{dayjs(project.time_show).format('MM-DD HH:mm')}</span>
                 </Box>
               }
+              sx={{ m: 0 }}
             />
-            <ListItemIcon sx={{ minWidth: 32, mt: 0.5 }}>
-              <ArrowForwardIosIcon fontSize="small" sx={{ color: '#888' }} />
+            <ListItemIcon sx={{ minWidth: 24, mt: 0.5 }}>
+              <ArrowForwardIosIcon fontSize="small" sx={{ color: '#999', fontSize: 12 }} />
             </ListItemIcon>
           </ListItem>
         ))}
       </List>
       
       {showAll && totalPages > 1 ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
           <Pagination 
             count={totalPages} 
             page={page} 
             onChange={handlePageChange} 
-            color="primary" 
+            color="primary"
+            size="small"
           />
         </Box>
       ) : !showAll && totalCount > limit ? (
-        <Box sx={{ textAlign: 'center', mt: 1 }}>
+        <Box sx={{ textAlign: 'center', pt: 1 }}>
           <Button 
             onClick={handleViewMore}
             variant="text" 
             color="primary"
-            sx={{ fontWeight: 500 }}
+            size="small"
+            sx={{ 
+              fontWeight: 500,
+              fontSize: '0.75rem',
+              py: 0.5,
+              minHeight: 'auto'
+            }}
           >
             查看更多
           </Button>
@@ -110,10 +179,10 @@ export default function ProjectList({ limit = 5, showAll = false }) {
       ) : null}
       
       {loading && projects.length > 0 && (
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <CircularProgress size={24} />
+        <Box sx={{ textAlign: 'center', pt: 1 }}>
+          <CircularProgress size={16} />
         </Box>
       )}
-    </>
+    </Box>
   );
 } 
