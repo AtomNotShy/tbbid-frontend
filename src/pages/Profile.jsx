@@ -80,12 +80,6 @@ export default function Profile() {
                 {userInfo.membership_end ? new Date(userInfo.membership_end).toLocaleString() : '无'}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ width: 100 }} color="text.secondary">会员状态</Typography>
-              <Typography color={userInfo.is_membership_active ? 'green' : 'red'}>
-                {userInfo.is_membership_active ? '有效' : '无效'}
-              </Typography>
-            </Box>
           </Box>
         </>
       )}
