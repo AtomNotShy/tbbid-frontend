@@ -149,9 +149,9 @@ export default function BidResultList({ limit = 5, showAll = false }) {
                     color: 'text.secondary', 
                     fontSize: 12 
                   }}>
-                    <span>中标单位：{result.bidder_name}</span>
+                    <span>中标单位：<Box component="span" sx={{ color: '#1976d2', fontWeight: 600 }}>{result.bidder_name}</Box></span>
                     <span>中标金额：{result.win_amt ? `¥${result.win_amt}` : '—'}</span>
-                    <span>公示：{result.open_time ? dayjs(result.open_time).format('MM-DD HH:mm') : '-'}</span>
+                    <span>公示时间：{result.open_time ? dayjs(result.open_time).format('YYYY-MM-DD HH:mm') : '-'}</span>
                   </Box>
                 }
                 sx={{ m: 0 }}

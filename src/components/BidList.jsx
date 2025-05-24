@@ -134,12 +134,12 @@ export default function BidList({ limit = 5, showAll = false }) {
                   fontSize: 12 
                 }}>
                   {bid.bid_size !== null && bid.bid_size !== 0 ? (
-                    <span>投标企业：{bid.bid_size}家</span>
+                    <span>投标企业：<Box component="span" sx={{ color: '#1976d2', fontWeight: 600 }}>{bid.bid_size}</Box>家</span>
                   ) : (
                     <span>投标企业：—</span>
                   )}
                   <span>中标价：{bid.winning_amount ? `¥${bid.winning_amount}` : '—'}</span>
-                  <span>开标：{bid.open_time ? dayjs(bid.open_time).format('MM-DD HH:mm') : '—'}</span>
+                  <span>公示时间：{bid.winning_time ? dayjs(bid.winning_time).format('YYYY-MM-DD HH:mm') : '—'}</span>
                 </Box>
               }
               sx={{ m: 0 }}

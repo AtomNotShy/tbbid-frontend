@@ -15,6 +15,40 @@ export default function ProjectList({ limit = 5, showAll = false }) {
   const [totalCount, setTotalCount] = useState(0);
   const PAGE_SIZE = limit;
   const navigate = useNavigate();
+  const STAGE = {'1':'招标','2':'已完成'}
+
+  // 添加状态样式获取函数
+  const getStageStyle = (stage) => {
+    switch(stage) {
+      case 1:
+      case '1':
+        return {
+          color: '#fff',
+          backgroundColor: '#4caf50',
+          px: 1,
+          py: 0.25,
+          borderRadius: 1,
+          fontSize: '11px',
+          fontWeight: 500
+        };
+      case 2:
+      case '2':
+        return {
+          color: '#fff',
+          backgroundColor: '#2196f3',
+          px: 1,
+          py: 0.25,
+          borderRadius: 1,
+          fontSize: '11px',
+          fontWeight: 500
+        };
+      default:
+        return {
+          color: '#666',
+          fontSize: '12px'
+        };
+    }
+  };
 
   useEffect(() => {
     loadProjects(page);
@@ -135,9 +169,17 @@ export default function ProjectList({ limit = 5, showAll = false }) {
                   color: 'text.secondary', 
                   fontSize: 12 
                 }}> 
-                  <span>区域：{project.district_show || '—'}</span>
-                  <span>金额：{project.classify_show || '—'}</span>
-                  <span>发布：{dayjs(project.time_show).format('MM-DD HH:mm')}</span>
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    状态：
+                    <Box 
+                      component="span" 
+                      sx={getStageStyle(project.stage)}
+                    >
+                      {STAGE[project.stage] || '—'}
+                    </Box>
+                  </Box>
+                  <span>来源：{project.platform_name || '—'}</span>
+                  <span>发布：{dayjs(project.time_show).format('YYYY-MM-DD HH:mm')}</span>
                 </Box>
               }
               sx={{ m: 0 }}
