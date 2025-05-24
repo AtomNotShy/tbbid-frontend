@@ -66,10 +66,6 @@ export default function Home() {
     >
       <UnifiedSearch />
       
-      <Typography variant="h5" fontWeight={600} sx={{ mb: 3, textAlign: 'center' }}>
-        最新更新
-      </Typography>
-      
       {/* 优化后的Grid布局 */}
       <Grid
         container

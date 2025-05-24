@@ -132,6 +132,21 @@ export function useCompanyAchievements(corpCode, page = 1, enabled = false) {
   });
 }
 
+// 公司项目经理业绩数据请求
+export function useCompanyManagerPerformances(corpCode, page = 1, enabled = false) {
+  return useQuery({
+    queryKey: ['companyManagerPerformances', corpCode, page],
+    queryFn: async () => {
+      const response = await axios.get(`/api/company-manager-performances/?corp_code=${encodeURIComponent(corpCode)}&page=${page}`);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    enabled: enabled && !!corpCode,
+    keepPreviousData: true,
+  });
+}
+
 // 通用的 API 请求 hook，可以用于其他接口
 export function useApiData(endpoint, queryKey, options = {}) {
   return useQuery({

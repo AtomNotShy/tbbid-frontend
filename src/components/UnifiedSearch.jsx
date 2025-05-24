@@ -71,7 +71,7 @@ export default function UnifiedSearch() {
       case 'bid':
         return '输入标段名称或关键词...';
       case 'bid_result':
-        return '输入中标结果、企业名称或关键词...';
+        return '输入项目名字、企业名称或关键词...';
       default:
         return '输入搜索关键词...';
     }
@@ -114,19 +114,95 @@ export default function UnifiedSearch() {
           }
         }}
       >
-        <ToggleButton value="project" aria-label="项目">
+        <ToggleButton 
+          value="project" 
+          aria-label="项目"
+          sx={{
+            color: 'text.secondary',
+            transition: 'color 0.2s',
+            '&.Mui-selected': {
+              color: 'primary.main',
+              backgroundColor: 'transparent',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              }
+            },
+            '&:hover': {
+              color: 'primary.main',
+              backgroundColor: 'transparent'
+            }
+          }}
+        >
           <DescriptionIcon sx={{ mr: 1 }} />
           项目
         </ToggleButton>
-        <ToggleButton value="bid" aria-label="标段">
+        <ToggleButton 
+          value="bid" 
+          aria-label="标段"
+          sx={{
+            color: 'text.secondary',
+            transition: 'color 0.2s',
+            '&.Mui-selected': {
+              color: 'primary.main',
+              backgroundColor: 'transparent',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              }
+            },
+            '&:hover': {
+              color: 'primary.main',
+              backgroundColor: 'transparent'
+            }
+          }}
+        >
           <FormatListNumberedIcon sx={{ mr: 1 }} />
           标段
         </ToggleButton>
-        <ToggleButton value="bid_result" aria-label="中标结果">
+        <ToggleButton 
+          value="bid_result" 
+          aria-label="中标结果"
+          sx={{
+            color: 'text.secondary',
+            transition: 'color 0.2s',
+            '&.Mui-selected': {
+              color: 'primary.main',
+              backgroundColor: 'transparent',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              }
+            },
+            '&:hover': {
+              color: 'primary.main',
+              backgroundColor: 'transparent'
+            }
+          }}
+        >
           <EmojiEventsIcon sx={{ mr: 1 }} />
           中标结果
         </ToggleButton>
-        <ToggleButton value="company" aria-label="公司">
+        <ToggleButton 
+          value="company" 
+          aria-label="公司"
+          sx={{
+            color: 'text.secondary',
+            transition: 'color 0.2s',
+            '&.Mui-selected': {
+              color: 'primary.main',
+              backgroundColor: 'transparent',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              }
+            },
+            '&:hover': {
+              color: 'primary.main',
+              backgroundColor: 'transparent'
+            }
+          }}
+        >
           <BusinessIcon sx={{ mr: 1 }} />
           公司
         </ToggleButton>

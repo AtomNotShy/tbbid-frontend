@@ -26,7 +26,7 @@ export default function Navbar() {
         <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: 2, display: 'flex', alignItems: 'center' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit', marginRight: 24 }}>
             <BusinessIcon sx={{ fontSize: 28, mr: 1 }} />
-            <Typography variant="h6" fontWeight={700}>招投标平台</Typography>
+            <Typography variant="h6" fontWeight={700}>投标云</Typography>
           </Link>
           <Box component="nav" sx={{ flex: 1 }}>
             <Stack direction="row" spacing={3} alignItems="center">

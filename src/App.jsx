@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { NavigationProvider } from './context/NavigationContext';
 import Navbar from './components/Navbar';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import Home from './pages/Home';
 import ProjectDetail from './pages/ProjectDetail';
 import BidDetail from './pages/BidDetail';
@@ -27,6 +28,7 @@ export default function App() {
         <NavigationProvider>
           <Router>
             <Navbar />
+            <AnnouncementBanner />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/projects/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />

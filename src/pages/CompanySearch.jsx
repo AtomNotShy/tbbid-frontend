@@ -41,6 +41,10 @@ export default function CompanySearch() {
   const [achTotal, setAchTotal] = useState(0);
   const [achievements, setAchievements] = useState([]);
   const ACH_PAGE_SIZE = 20;
+  const [managerPerfPage, setManagerPerfPage] = useState(1);
+  const [managerPerfTotal, setManagerPerfTotal] = useState(0);
+  const [managerPerformances, setManagerPerformances] = useState([]);
+  const MANAGER_PERF_PAGE_SIZE = 20;
 
   // 检查是否从详情页返回，以及需要恢复的状态
   useEffect(() => {
@@ -146,6 +150,27 @@ export default function CompanySearch() {
     }
   }, [selected, tab, achPage]);
 
+  // 加载项目经理业绩
+  const loadManagerPerformances = (page) => {
+    if (!selected?.corp_code) return;
+    
+    axios.get(`/api/company-manager-performances/?corp_code=${encodeURIComponent(selected.corp_code)}&page=${page}`)
+      .then(res => {
+        setManagerPerformances(res.data.results || []);
+        setManagerPerfTotal(res.data.count || 0);
+      })
+      .catch(err => {
+        setManagerPerformances([]);
+        setManagerPerfTotal(0);
+      });
+  };
+
+  useEffect(() => {
+    if (tab === 'manager_performances' && selected) {
+      loadManagerPerformances(managerPerfPage);
+    }
+  }, [tab, selected, managerPerfPage]);
+
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -214,13 +239,14 @@ export default function CompanySearch() {
             <Button variant="text" size="small" onClick={() => setSelected(null)} sx={{ mb: 2 }}>
               ← 返回搜索结果
             </Button>
-            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); setBidPage(1); setWinPage(1); setAchPage(1); }} sx={{ mb: 2 }}>
+            <Tabs value={tab} onChange={(_, v) => { setTab(v); setEmpPage(1); setBidPage(1); setWinPage(1); setAchPage(1); setManagerPerfPage(1); }} sx={{ mb: 2 }}>
               <Tab label="基本信息" value="basic" />
               <Tab label="资质信息" value="qualification" />
               <Tab label="员工信息" value="employee" />
               <Tab label="招投标记录" value="bidding" />
               <Tab label="中标记录" value="winning" />
               <Tab label="全国业绩" value="achievements" />
+              <Tab label="项目经理业绩" value="manager_performances" />
             </Tabs>
             {tab === 'basic' && (
               <Grid container spacing={4}>
@@ -411,6 +437,41 @@ export default function CompanySearch() {
                   </>
                 ) : (
                   <Typography color="text.secondary">暂无全国业绩</Typography>
+                )}
+              </Box>
+            )}
+            {tab === 'manager_performances' && (
+              <Box sx={{ mt: 2 }}>
+                <Typography fontWeight={600} sx={{ mb: 2 }}>项目经理业绩</Typography>
+                {managerPerformances.length > 0 ? (
+                  <>
+                    <List>
+                      {managerPerformances.map(perf => (
+                        <ListItem key={perf.id} divider>
+                          <ListItemText
+                            primary={<span>{perf.name} - {perf.project_name}</span>}
+                            secondary={
+                              <span>
+                                角色：{perf.role || '—'}
+                                <span style={{ margin: '0 12px' }}>|</span>
+                                数据级别：{perf.data_level || '—'}
+                                <span style={{ margin: '0 12px' }}>|</span>
+                                更新时间：{perf.updated_at ? dayjs(perf.updated_at).format('YYYY-MM-DD HH:mm') : '—'}
+                              </span>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                    <Pagination
+                      count={Math.ceil(managerPerfTotal / MANAGER_PERF_PAGE_SIZE)}
+                      page={managerPerfPage}
+                      onChange={(_, v) => setManagerPerfPage(v)}
+                      sx={{ mt: 2 }}
+                    />
+                  </>
+                ) : (
+                  <Typography color="text.secondary">暂无项目经理业绩信息</Typography>
                 )}
               </Box>
             )}
