@@ -1,89 +1,55 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, Typography, Paper, List, ListItem, ListItemText, ListItemIcon, TextField, 
-  InputAdornment, Pagination, CircularProgress
+  InputAdornment, Pagination, CircularProgress, Alert, Button
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SearchIcon from '@mui/icons-material/Search';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import truncate from '../utils/util.js';
+import { useBidsList } from '../hooks/useApiData';
+import { useDebounce } from '../hooks/useDebounce';
 
 export default function BidsList() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialSearchQuery = queryParams.get('search') || '';
 
-  const [bids, setBids] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [searchTimeout, setSearchTimeout] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
   const PAGE_SIZE = 10;
 
-  const loadBids = useCallback((currentPage, query = '') => {
-    setLoading(true);
-    let url = `/api/bid_sections/?page=${currentPage}&page_size=${PAGE_SIZE}`;
-    if (query) {
-      url += `&search=${encodeURIComponent(query)}`;
-    }
-    
-    axios.get(url)
-      .then(res => {
-        // Handle both paginated and non-paginated responses
-        if (res.data.results && res.data.count !== undefined) {
-          // Paginated response
-          setBids(Array.isArray(res.data.results) ? res.data.results : []);
-          setTotalCount(res.data.count);
-          setTotalPages(Math.ceil(res.data.count / PAGE_SIZE));
-        } else {
-          // Non-paginated response (fall back to client-side pagination)
-          const data = Array.isArray(res.data) ? res.data : [];
-          setBids(data);
-          setTotalCount(data.length);
-          setTotalPages(Math.ceil(data.length / PAGE_SIZE));
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('加载失败');
-        setLoading(false);
-      });
-  }, []);
+  // 搜索防抖
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // 当页码变化时加载数据
+  // 使用 React Query 获取标段数据
+  const { 
+    data: bidsData, 
+    isLoading, 
+    isError, 
+    error,
+    refetch 
+  } = useBidsList(page, debouncedSearchQuery, PAGE_SIZE);
+
+  // 当搜索查询变化时重置页码
   useEffect(() => {
-    loadBids(page, searchQuery);
-  }, [page, loadBids, searchQuery]);
+    if (debouncedSearchQuery !== searchQuery) {
+      setPage(1);
+    }
+  }, [debouncedSearchQuery, searchQuery]);
 
   // 初始加载时从URL读取搜索参数
   useEffect(() => {
     if (initialSearchQuery) {
       setSearchQuery(initialSearchQuery);
-      setPage(1);
     }
   }, [initialSearchQuery]);
 
-  // 处理搜索查询变化
-  useEffect(() => {
-    // Debounce search to avoid too many requests
-    if (searchTimeout) clearTimeout(searchTimeout);
-    
-    const timeoutId = setTimeout(() => {
-      setPage(1); // Reset to first page on new search
-      loadBids(1, searchQuery);
-    }, 300);
-    
-    setSearchTimeout(timeoutId);
-    
-    return () => {
-      if (searchTimeout) clearTimeout(searchTimeout);
-    };
-  }, [searchQuery, loadBids]);
+  // 处理响应数据
+  const bids = bidsData?.results || bidsData || [];
+  const totalCount = bidsData?.count || (Array.isArray(bidsData) ? bidsData.length : 0);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -109,12 +75,19 @@ export default function BidsList() {
           }}
         />
 
-        {loading && bids.length === 0 ? (
+        {isLoading && bids.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <CircularProgress />
           </Box>
-        ) : error ? (
-          <Typography color="error">{error}</Typography>
+        ) : isError ? (
+          <Alert 
+            severity="error" 
+            action={
+              <Button size="small" onClick={() => refetch()}>重试</Button>
+            }
+          >
+            加载失败: {error?.message || '未知错误'}
+          </Alert>
         ) : bids.length === 0 ? (
           <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>暂无匹配标段</Typography>
         ) : (
@@ -158,7 +131,7 @@ export default function BidsList() {
               />
             </Box>
             
-            {loading && bids.length > 0 && (
+            {isLoading && bids.length > 0 && (
               <Box sx={{ textAlign: 'center', mt: 2 }}>
                 <CircularProgress size={24} />
               </Box>

@@ -19,6 +19,119 @@ export function useTodayUpdateCount() {
   });
 }
 
+// 项目列表数据请求
+export function useProjectsList(page = 1, searchQuery = '', pageSize = 10) {
+  return useQuery({
+    queryKey: ['projects', page, searchQuery, pageSize],
+    queryFn: async () => {
+      let url = `/api/projects/?page=${page}&page_size=${pageSize}`;
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const response = await axios.get(url);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true, // 保持之前的数据，避免页面切换时闪烁
+  });
+}
+
+// 标段列表数据请求
+export function useBidsList(page = 1, searchQuery = '', pageSize = 10) {
+  return useQuery({
+    queryKey: ['bids', page, searchQuery, pageSize],
+    queryFn: async () => {
+      let url = `/api/bid_sections/?page=${page}&page_size=${pageSize}`;
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const response = await axios.get(url);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true,
+  });
+}
+
+// 中标结果列表数据请求
+export function useBidResultsList(page = 1, searchQuery = '', pageSize = 10) {
+  return useQuery({
+    queryKey: ['bidResults', page, searchQuery, pageSize],
+    queryFn: async () => {
+      let url = `/api/bid_results/?page=${page}&page_size=${pageSize}`;
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const response = await axios.get(url);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true,
+  });
+}
+
+// 公司搜索数据请求
+export function useCompanySearch(query, enabled = false) {
+  return useQuery({
+    queryKey: ['companySearch', query],
+    queryFn: async () => {
+      const response = await axios.get(`/api/company-search?query=${encodeURIComponent(query)}`);
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    enabled: enabled && !!query.trim(), // 只有当 enabled 为 true 且 query 不为空时才执行
+  });
+}
+
+// 公司投标记录数据请求
+export function useCompanyBids(corpCode, page = 1, enabled = false) {
+  return useQuery({
+    queryKey: ['companyBids', corpCode, page],
+    queryFn: async () => {
+      const response = await axios.get(`/api/company-bids/?corp_code=${encodeURIComponent(corpCode)}&page=${page}`);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    enabled: enabled && !!corpCode,
+    keepPreviousData: true,
+  });
+}
+
+// 公司中标记录数据请求
+export function useCompanyWins(corpCode, page = 1, enabled = false) {
+  return useQuery({
+    queryKey: ['companyWins', corpCode, page],
+    queryFn: async () => {
+      const response = await axios.get(`/api/company-wins/?corp_code=${encodeURIComponent(corpCode)}&page=${page}`);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    enabled: enabled && !!corpCode,
+    keepPreviousData: true,
+  });
+}
+
+// 公司全国业绩数据请求
+export function useCompanyAchievements(corpCode, page = 1, enabled = false) {
+  return useQuery({
+    queryKey: ['companyAchievements', corpCode, page],
+    queryFn: async () => {
+      const response = await axios.get(`/api/company-achievements/?corp_code=${encodeURIComponent(corpCode)}&page=${page}`);
+      return response.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    enabled: enabled && !!corpCode,
+    keepPreviousData: true,
+  });
+}
+
 // 通用的 API 请求 hook，可以用于其他接口
 export function useApiData(endpoint, queryKey, options = {}) {
   return useQuery({
