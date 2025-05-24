@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   List,
   ListItem,
@@ -14,47 +14,25 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import truncate from '../utils/util.js';
-import axios from 'axios';
 import dayjs from 'dayjs';
+import { useHomeBidResultsList } from '../hooks/useApiData';
 
 export default function BidResultList({ limit = 5, showAll = false }) {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const PAGE_SIZE = limit;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadResults(page);
-  }, [page, limit]);
+  // 使用 React Query hook
+  const { 
+    data: resultsData, 
+    isLoading, 
+    isError, 
+    error 
+  } = useHomeBidResultsList(page, limit);
 
-  const loadResults = (currentPage) => {
-    setLoading(true);
-    axios.get(`/api/bid_results/?page=${currentPage}&page_size=${PAGE_SIZE}`)
-      .then(res => {
-        // Handle both paginated and non-paginated responses
-        if (res.data.results && res.data.count !== undefined) {
-          // Paginated response
-          setResults(Array.isArray(res.data.results) ? res.data.results : []);
-          setTotalCount(res.data.count);
-          setTotalPages(Math.ceil(res.data.count / PAGE_SIZE));
-        } else {
-          // Non-paginated response (fall back to client-side pagination)
-          const data = Array.isArray(res.data) ? res.data : [];
-          setResults(data);
-          setTotalCount(data.length);
-          setTotalPages(Math.ceil(data.length / PAGE_SIZE));
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('加载失败');
-        setLoading(false);
-      });
-  };
+  // 处理响应数据
+  const results = resultsData?.results || resultsData || [];
+  const totalCount = resultsData?.count || (Array.isArray(resultsData) ? resultsData.length : 0);
+  const totalPages = Math.ceil(totalCount / limit);
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -65,7 +43,7 @@ export default function BidResultList({ limit = 5, showAll = false }) {
     navigate('/bid-results-list');
   };
 
-  if (loading && results.length === 0) {
+  if (isLoading && results.length === 0) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
         <CircularProgress size={24} />
@@ -73,10 +51,10 @@ export default function BidResultList({ limit = 5, showAll = false }) {
     );
   }
   
-  if (error) {
+  if (isError) {
     return (
       <Typography color="error" sx={{ textAlign: 'center', py: 2 }}>
-        {error}
+        {error?.message || '加载失败'}
       </Typography>
     );
   }
@@ -194,7 +172,7 @@ export default function BidResultList({ limit = 5, showAll = false }) {
         </Box>
       ) : null}
       
-      {loading && results.length > 0 && (
+      {isLoading && results.length > 0 && (
         <Box sx={{ textAlign: 'center', pt: 1 }}>
           <CircularProgress size={16} />
         </Box>

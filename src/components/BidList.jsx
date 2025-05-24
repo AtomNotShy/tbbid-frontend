@@ -1,48 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { List, ListItem, ListItemText, ListItemIcon, Box, Typography, CircularProgress, Button, Pagination } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import axios from 'axios';
 import dayjs from 'dayjs';
+import { useHomeBidsList } from '../hooks/useApiData';
 
 export default function BidList({ limit = 5, showAll = false }) {
-  const [bids, setBids] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const PAGE_SIZE = limit;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadBids(page);
-  }, [page, limit]);
+  // 使用 React Query hook
+  const { 
+    data: bidsData, 
+    isLoading, 
+    isError, 
+    error 
+  } = useHomeBidsList(page, limit);
 
-  const loadBids = (currentPage) => {
-    setLoading(true);
-    axios.get(`/api/bid_sections/?page=${currentPage}&page_size=${PAGE_SIZE}`)
-      .then(res => {
-        // Handle both paginated and non-paginated responses
-        if (res.data.results && res.data.count !== undefined) {
-          // Paginated response
-          setBids(Array.isArray(res.data.results) ? res.data.results : []);
-          setTotalCount(res.data.count);
-          setTotalPages(Math.ceil(res.data.count / PAGE_SIZE));
-        } else {
-          // Non-paginated response (fall back to client-side pagination)
-          const data = Array.isArray(res.data) ? res.data : [];
-          setBids(data);
-          setTotalCount(data.length);
-          setTotalPages(Math.ceil(data.length / PAGE_SIZE));
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('加载失败');
-        setLoading(false);
-      });
-  };
+  // 处理响应数据
+  const bids = bidsData?.results || bidsData || [];
+  const totalCount = bidsData?.count || (Array.isArray(bidsData) ? bidsData.length : 0);
+  const totalPages = Math.ceil(totalCount / limit);
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -53,7 +31,7 @@ export default function BidList({ limit = 5, showAll = false }) {
     navigate('/bids-list');
   };
 
-  if (loading && bids.length === 0) {
+  if (isLoading && bids.length === 0) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
         <CircularProgress size={24} />
@@ -61,10 +39,10 @@ export default function BidList({ limit = 5, showAll = false }) {
     );
   }
   
-  if (error) {
+  if (isError) {
     return (
       <Typography color="error" sx={{ textAlign: 'center', py: 2 }}>
-        {error}
+        {error?.message || '加载失败'}
       </Typography>
     );
   }
@@ -180,7 +158,7 @@ export default function BidList({ limit = 5, showAll = false }) {
         </Box>
       ) : null}
       
-      {loading && bids.length > 0 && (
+      {isLoading && bids.length > 0 && (
         <Box sx={{ textAlign: 'center', pt: 1 }}>
           <CircularProgress size={16} />
         </Box>

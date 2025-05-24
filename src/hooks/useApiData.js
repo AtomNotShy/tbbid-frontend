@@ -19,7 +19,7 @@ export function useTodayUpdateCount() {
   });
 }
 
-// 项目列表数据请求
+// 项目列表数据请求（搜索页面使用）
 export function useProjectsList(page = 1, searchQuery = '', pageSize = 10) {
   return useQuery({
     queryKey: ['projects', page, searchQuery, pageSize],
@@ -37,7 +37,21 @@ export function useProjectsList(page = 1, searchQuery = '', pageSize = 10) {
   });
 }
 
-// 标段列表数据请求
+// 首页项目列表数据请求（首页组件使用）
+export function useHomeProjectsList(page = 1, pageSize = 5) {
+  return useQuery({
+    queryKey: ['homeProjects', page, pageSize],
+    queryFn: async () => {
+      const response = await axios.get(`/api/projects/?page=${page}&page_size=${pageSize}`);
+      return response.data;
+    },
+    staleTime: 4 * 60 * 60 * 1000, // 4小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true,
+  });
+}
+
+// 标段列表数据请求（搜索页面使用）
 export function useBidsList(page = 1, searchQuery = '', pageSize = 10) {
   return useQuery({
     queryKey: ['bids', page, searchQuery, pageSize],
@@ -55,7 +69,21 @@ export function useBidsList(page = 1, searchQuery = '', pageSize = 10) {
   });
 }
 
-// 中标结果列表数据请求
+// 首页标段列表数据请求（首页组件使用）
+export function useHomeBidsList(page = 1, pageSize = 5) {
+  return useQuery({
+    queryKey: ['homeBids', page, pageSize],
+    queryFn: async () => {
+      const response = await axios.get(`/api/bid_sections/?page=${page}&page_size=${pageSize}`);
+      return response.data;
+    },
+    staleTime: 4 * 60 * 60 * 1000, // 4小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true,
+  });
+}
+
+// 中标结果列表数据请求（搜索页面使用）
 export function useBidResultsList(page = 1, searchQuery = '', pageSize = 10) {
   return useQuery({
     queryKey: ['bidResults', page, searchQuery, pageSize],
@@ -68,6 +96,20 @@ export function useBidResultsList(page = 1, searchQuery = '', pageSize = 10) {
       return response.data;
     },
     staleTime: 24 * 60 * 60 * 1000, // 24小时
+    cacheTime: 25 * 60 * 60 * 1000, // 25小时
+    keepPreviousData: true,
+  });
+}
+
+// 首页中标结果列表数据请求（首页组件使用）
+export function useHomeBidResultsList(page = 1, pageSize = 5) {
+  return useQuery({
+    queryKey: ['homeBidResults', page, pageSize],
+    queryFn: async () => {
+      const response = await axios.get(`/api/bid_results/?page=${page}&page_size=${pageSize}`);
+      return response.data;
+    },
+    staleTime: 4 * 60 * 60 * 1000, // 4小时
     cacheTime: 25 * 60 * 60 * 1000, // 25小时
     keepPreviousData: true,
   });

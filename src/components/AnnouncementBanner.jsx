@@ -1,20 +1,36 @@
 import React, { useState } from 'react';
-import { Box, Typography, IconButton, Fade } from '@mui/material';
+import { Box, Typography, IconButton, Fade, Chip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AnnouncementBanner() {
   const [isVisible, setIsVisible] = useState(true);
+  const queryClient = useQueryClient();
 
   const handleClose = () => {
     setIsVisible(false);
   };
 
+  // 获取缓存状态 - 只在开发环境显示
+  const getCacheInfo = () => {
+    if (process.env.NODE_ENV !== 'development') return null;
+    
+    const queryCache = queryClient.getQueryCache();
+    const queries = queryCache.getAll();
+    const activeQueries = queries.filter(q => q.getObserversCount() > 0);
+    const cachedQueries = queries.filter(q => q.state.data !== undefined);
+    
+    return { total: queries.length, active: activeQueries.length, cached: cachedQueries.length };
+  };
+
+  const cacheInfo = getCacheInfo();
+
   return (
     <Fade in={isVisible}>
       <Box
         sx={{
-          background: 'linear-gradient(90deg,rgb(100, 100, 100) 0%,rgb(75, 75, 75) 50%,rgb(25, 25, 25) 100%)',
+          background: 'linear-gradient(90deg, #4a4a4a 0%, #777777 50%, #4a4a4a 100%)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
           py: 1.5,
           px: 2,
@@ -58,6 +74,21 @@ export default function AnnouncementBanner() {
           >
             此网站仅供内部学习交流使用，请勿外传
           </Typography>
+          
+          {/* 开发环境缓存状态 */}
+          {cacheInfo && (
+            <Chip
+              label={`缓存: ${cacheInfo.cached}/${cacheInfo.total}`}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: 11,
+                color: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                '& .MuiChip-label': { px: 1 }
+              }}
+            />
+          )}
           
           <IconButton
             onClick={handleClose}
